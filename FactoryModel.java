@@ -23,6 +23,11 @@ public class FactoryModel {
     /**
      * Tests current vending machine in factory
      */
-    public void testVM(int x) {
+    public void testVM() {
+        
+    }
+    
+    public VendingMachine getRVM(){
+        return this.vm;
     }
 }

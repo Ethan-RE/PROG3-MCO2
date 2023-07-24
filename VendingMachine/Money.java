@@ -1,13 +1,13 @@
 package VendingMachine;
 
 public class Money {
-    private int value;
+    private double value;
 
-    public Money(int value) {
+    public Money(double value) {
         this.value=value;
     }
 
-    public getValue() {
+    public double getValue() {
         return this.value;
     }
 }

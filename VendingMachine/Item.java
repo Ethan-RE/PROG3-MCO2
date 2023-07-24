@@ -4,9 +4,10 @@ package VendingMachine;
  * A class representing a singular item
  */
 public class Item {
-    private String name;
-    private double price;
-    private double calories;
+    protected String name;
+    protected double price;
+    protected double calories;
+    protected String step;
 
     /**
      * Constructor for the Item class
@@ -18,6 +19,12 @@ public class Item {
         this.name = name;
         this.price = price;
         this.calories = calories;
+    }
+
+    public Item() {
+        this.name=null;
+        this.price=0;
+        this.calories=0;
     }
 
     /**
