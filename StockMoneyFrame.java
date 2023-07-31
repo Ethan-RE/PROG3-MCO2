@@ -25,7 +25,7 @@ public class StockMoneyFrame extends JFrame{
 
         for(int i = 0 ; i<this.moneyValue.size() ; i++) {
             String temp = "Bill: " + this.moneyValue.get(i);
-            String temp2 = "Stock: " + this.moneyStock.get(i);
+            String temp2 = String.valueOf(this.moneyStock.get(i));
 
             this.buttons.add(new JButton(temp));
             this.stock.add(new JTextArea(temp2));
@@ -48,7 +48,11 @@ public class StockMoneyFrame extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
-        setVisible(true);
+        setVisible(false);
+    }
+
+    public JTextArea getStock(int index){
+        return this.stock.get(index);
     }
 
     public void setItemButtonListener(int index, ActionListener actionListener){
@@ -60,8 +64,4 @@ public class StockMoneyFrame extends JFrame{
         this.backButton.addActionListener(actionListener);
     }
 
-    public static void main(String[] args) {
-        VendingMachine vm = new VendingMachine();
-        StockMoneyFrame sim = new StockMoneyFrame(vm.getMoneyValue(), vm.getMoneyStock());
-    }
 }

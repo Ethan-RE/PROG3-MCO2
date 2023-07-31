@@ -35,14 +35,14 @@ public class Frame3{
            }
 
            public void setTvendButtonListener(ActionListener actionListener){
-                    this.tvendButton.addActionListener(actionListener);
-                }
+                this.tvendButton.addActionListener(actionListener);
+            }
 
-                public void setTmaintButtonListener(ActionListener actionListener){
-                    this.tmaintButton.addActionListener(actionListener);
-                }
+            public void setTmaintButtonListener(ActionListener actionListener){
+                this.tmaintButton.addActionListener(actionListener);
+            }
 
-                public void setReturnButtonListener(ActionListener actionListener){
-                    this.returnButton.addActionListener(actionListener);
-                }
+            public void setReturnButtonListener(ActionListener actionListener){
+                this.returnButton.addActionListener(actionListener);
+            }
 }

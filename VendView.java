@@ -5,12 +5,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 public class VendView extends JFrame{
-    private JFrame rVendFrame;
-    private JButton buyButton,backButton;
-    private ArrayList<JTextArea> displayPrices,displayCalories,displayStock;
-    private ArrayList<JButton> buttons;
+    protected JFrame rVendFrame;
+    protected JButton buyButton,backButton;
+    protected JTextArea money,price,change;
+    protected ArrayList<JTextArea> displayPrices,displayCalories,displayStock;
+    protected ArrayList<JButton> buttons,moneyButtons;
+    protected List<String> denominations,items;
 
     public VendView(ArrayList<String> items, ArrayList<Double> prices, ArrayList<Double> calories, ArrayList<Integer> stocks){
         super("Vending Machine");
@@ -23,6 +27,10 @@ public class VendView extends JFrame{
         this.displayCalories = new ArrayList<>();
         this.displayStock = new ArrayList<>();
         this.buttons = new ArrayList<>();
+        this.moneyButtons = new ArrayList<>();
+
+        this.items = items;
+        this.denominations = List.of("One","Five","Ten","Twenty","Fifty","One Hundred","Two Hundred","Five Hundred","One Thousand");
 
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
@@ -65,8 +73,17 @@ public class VendView extends JFrame{
         }
         System.out.println("stocks labled");
 
+        this.money = new JTextArea("0");
         this.buyButton = new JButton("Buy item");
+        this.price = new JTextArea("0");
+        this.change = new JTextArea("0");
         this.backButton = new JButton("Return to menu");
+
+        for(int i = 0;i < denominations.size();i++){
+            String holder = denominations.get(i);
+            JButton temp = new JButton(holder);
+            moneyButtons.add(temp);
+        }
 
         System.out.println("for loop to add buttons to panels");
         for(int i = 0;i < items.size();i++){
@@ -89,6 +106,29 @@ public class VendView extends JFrame{
             System.out.println("panel added to main");
         }
 
+        JPanel moneyPanel = new JPanel();
+        moneyPanel.setLayout(new BoxLayout(moneyPanel, BoxLayout.Y_AXIS));
+
+        moneyPanel.add(Box.createVerticalGlue());
+
+        for (JButton moneyButton : moneyButtons) {
+            moneyPanel.add(moneyButton);
+        }
+
+        moneyPanel.add(money);
+
+        moneyPanel.add(Box.createVerticalGlue());
+
+        mainPanel.add(moneyPanel,BorderLayout.EAST);
+
+        JPanel price = new JPanel();
+        price.add(this.price,BorderLayout.SOUTH);
+        mainPanel.add(price);
+
+        JPanel change = new JPanel();
+        change.add(this.change,BorderLayout.SOUTH);
+        mainPanel.add(price);
+
         JPanel buy = new JPanel();
         buy.add(this.buyButton, BorderLayout.SOUTH);
         mainPanel.add(buy);
@@ -108,13 +148,27 @@ public class VendView extends JFrame{
         return this.rVendFrame;
     }
 
+    public void setMoneyButtonListener(int index,ActionListener actionListener){
+        JButton temp = moneyButtons.get(index);
+        temp.addActionListener(actionListener);
+    }
+
     public void setItemButtonListener(int index, ActionListener actionListener){
         JButton temp = buttons.get(index);
         temp.addActionListener(actionListener);
     }
+
+    public String getItems(int index){return this.items.get(index);}
     public JTextArea getStockTextArea(int index){
         return this.displayStock.get(index);
     }
+
+    public JTextArea getMoneyTextArea() { return this.money; }
+
+    public JTextArea getDisplayPriceTextArea(int index) { return this.displayPrices.get(index); }
+    public JTextArea getPriceTextArea(){ return this.price; }
+
+    public JTextArea getChangeTextArea() {return this.change; }
 
     public void setBuyButtonListener(ActionListener actionListener){
         this.buyButton.addActionListener(actionListener);
