@@ -34,7 +34,7 @@ public class TransactionHistoryFrame extends JFrame{
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
-        setVisible(true);
+        setVisible(false);
     }
 
     public void setBackButtonListener(ActionListener actionListener){

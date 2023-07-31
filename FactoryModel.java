@@ -8,6 +8,7 @@ import java.util.InputMismatchException;
  */
 public class FactoryModel {
     private VendingMachine vm;
+    private SpecialVendingMachine svm;
 
     //VM creation
 
@@ -18,6 +19,7 @@ public class FactoryModel {
         this.vm = new VendingMachine();
     }
 
+    public void createSVM() { this.svm = new SpecialVendingMachine(); }
     //VM testing
 
     /**
@@ -30,4 +32,5 @@ public class FactoryModel {
     public VendingMachine getRVM(){
         return this.vm;
     }
+    public SpecialVendingMachine getSVM() {return this.svm; }
 }

@@ -11,6 +11,7 @@ public class StockItemFrame extends JFrame{
     private ArrayList<Integer> itemStock;
 
     private ArrayList<JButton> buttons;
+    private ArrayList<JTextArea> stock;
     private JButton backButton;
     private JButton addNewItemButton;
 
@@ -20,7 +21,7 @@ public class StockItemFrame extends JFrame{
         this.itemNames = itemNames;
         this.itemStock = itemStock;
 
-        ArrayList<JTextArea> stock = new ArrayList<>();
+        stock = new ArrayList<>();
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         ArrayList<JPanel> items = new ArrayList<>();
@@ -28,12 +29,11 @@ public class StockItemFrame extends JFrame{
         for(int i=0 ; i<this.itemNames.size() ; i++) {
             String temp = this.itemNames.get(i);
             JButton holder = new JButton(temp);
-            String temp2 = "Stock: " + this.itemStock.get(i);
+            String temp2 = String.valueOf(this.itemStock.get(i));
             JTextArea holder2 = new JTextArea(temp2);
 
             this.buttons.add(holder);
             stock.add(holder2);
-            stock.get(i).setEditable(false);
 
             items.add(new JPanel());
             items.get(i).setLayout(new BoxLayout(items.get(i), BoxLayout.X_AXIS));
@@ -60,6 +60,10 @@ public class StockItemFrame extends JFrame{
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
         setVisible(false);
+    }
+
+    public JTextArea getStock(int index){
+        return this.stock.get(index);
     }
 
     public void setItemButtonListener(int index, ActionListener actionListener){
