@@ -7,8 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 
 
-public class TransactionHistoryFrame extends JFrame{
+public class TransactionHistoryFrame extends JFrame implements Observer{
     JButton backButton;
+    ArrayList<String> transactions;
     public TransactionHistoryFrame(ArrayList<String> transactions) {
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel,BoxLayout.Y_AXIS));
@@ -17,6 +18,8 @@ public class TransactionHistoryFrame extends JFrame{
         mainPanel.add(fields);
         ArrayList<JTextArea> transactionHistory = new ArrayList<>();
         int i = 0;
+
+        this.transactions = transactions;
 
         for(String transaction : transactions) {
             transactionHistory.add(new JTextArea(transaction));
@@ -37,8 +40,38 @@ public class TransactionHistoryFrame extends JFrame{
         setVisible(false);
     }
 
+    public void addTransaction(String transactionDetails) {
+        // Create a new JTextArea with the provided transaction details
+        JTextArea transactionTextArea = new JTextArea(transactionDetails);
+        transactionTextArea.setEditable(false);
+
+        // Add the new transaction to the display
+        JPanel mainPanel = (JPanel) getContentPane().getComponent(0);
+        mainPanel.add(transactionTextArea);
+
+        // Repaint the TransactionHistoryFrame to update the display
+        revalidate();
+        repaint();
+    }
+
     public void setBackButtonListener(ActionListener actionListener){
         this.backButton.addActionListener(actionListener);
     }
 
+    public void update() {
+        // Clear the existing transactions to avoid duplicates
+        JPanel mainPanel = (JPanel) getContentPane().getComponent(0);
+        mainPanel.removeAll();
+
+        // Add each transaction to the display
+        for (String transaction : transactions) {
+            JTextArea transactionTextArea = new JTextArea(transaction);
+            transactionTextArea.setEditable(false);
+            mainPanel.add(transactionTextArea);
+        }
+
+        // Repaint the TransactionHistoryFrame to update the display
+        revalidate();
+        repaint();
+    }
 }

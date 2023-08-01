@@ -38,11 +38,12 @@ public class ItemStack{
     /**
      * Pushes a new item onto the stack.
      */
-    public void pushItem() {
-        this.items.add(new Item(this.itemType));
+    public void pushItem() { this.items.add(new Item(this.itemType));
     }
 
     // Getters
+
+    public Item getItem(){ return this.itemType;}
 
     // Get the name of the item in the stack
     public String getItemName() {

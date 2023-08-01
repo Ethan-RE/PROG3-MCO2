@@ -115,6 +115,10 @@ public class VendingMachine {
         return transactions;
     }
 
+    public ArrayList<ItemStack> getItemTypes(){
+        return this.itemTypes;
+    }
+
     public ArrayList<String> getItemNames() {
         ArrayList<String> items = new ArrayList<String>();
         // Loop through itemTypes array to return each item's name

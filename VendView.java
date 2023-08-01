@@ -8,16 +8,21 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class VendView extends JFrame{
+public class VendView extends JFrame implements Observer{
     protected JFrame rVendFrame;
     protected JButton buyButton,backButton;
     protected JTextArea money,price,change;
     protected ArrayList<JTextArea> displayPrices,displayCalories,displayStock;
     protected ArrayList<JButton> buttons,moneyButtons;
     protected List<String> denominations,items;
+    private ArrayList<Double> prices;
+    private ArrayList<Integer> itemStocks;
 
     public VendView(ArrayList<String> items, ArrayList<Double> prices, ArrayList<Double> calories, ArrayList<Integer> stocks){
         super("Vending Machine");
+
+        this.prices = prices;
+        this.itemStocks = stocks;
 
         this.rVendFrame = new JFrame();
         this.rVendFrame.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -46,8 +51,8 @@ public class VendView extends JFrame{
         }
         System.out.println("buttons labled");
 
-        for(int i = 0;i < prices.size();i++){
-            Double temp = prices.get(i);
+        for(int i = 0;i < this.prices.size();i++){
+            Double temp = this.prices.get(i);
             String s = String.valueOf(temp);
             JTextArea holder = new JTextArea(s);
             displayPrices.add(holder);
@@ -64,8 +69,8 @@ public class VendView extends JFrame{
         }
         System.out.println("calories labled");
 
-        for(int i = 0;i < stocks.size();i++){
-            Integer temp = stocks.get(i);
+        for(int i = 0;i < this.itemStocks.size();i++){
+            Integer temp = this.itemStocks.get(i);
             String s = String.valueOf(temp);
             JTextArea holder = new JTextArea(s);
             displayStock.add(holder);
@@ -122,10 +127,12 @@ public class VendView extends JFrame{
         mainPanel.add(moneyPanel,BorderLayout.EAST);
 
         JPanel price = new JPanel();
+        this.price.setEditable(false);
         price.add(this.price,BorderLayout.SOUTH);
         mainPanel.add(price);
 
         JPanel change = new JPanel();
+        this.change.setEditable(false);
         change.add(this.change,BorderLayout.SOUTH);
         mainPanel.add(price);
 
@@ -176,5 +183,21 @@ public class VendView extends JFrame{
 
     public void setBackButtonListener(ActionListener actionListener){
         this.backButton.addActionListener(actionListener);
+    }
+
+    public void update() {
+        // Update the stock quantity display for each item
+        for (int i = 0; i < itemStocks.size(); i++) {
+            JTextArea stockTextArea = displayStock.get(i);
+            int updatedStock = itemStocks.get(i);
+            stockTextArea.setText(String.valueOf(updatedStock));
+        }
+
+        // Update the price display for each item
+        for (int i = 0; i < prices.size(); i++) {
+            JTextArea priceTextArea = displayPrices.get(i);
+            double updatedPrice = prices.get(i);
+            priceTextArea.setText(String.valueOf(updatedPrice));
+        }
     }
 }

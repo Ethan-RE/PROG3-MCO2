@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class SetItemPriceFrame extends JFrame{
+public class SetItemPriceFrame extends JFrame implements Observer{
     private ArrayList<String> itemNames;
     private ArrayList<Double> itemPrice;
     private ArrayList<JTextArea> price;
@@ -87,5 +87,14 @@ public class SetItemPriceFrame extends JFrame{
 
     public void setBackButtonListener(ActionListener actionListener){
         this.backButton.addActionListener(actionListener);
+    }
+
+    public void update() {
+        // Update the item price display for each item
+        for (int i = 0; i < itemPrice.size(); i++) {
+            JTextArea priceTextArea = price.get(i);
+            double updatedPrice = itemPrice.get(i);
+            priceTextArea.setText(String.valueOf(updatedPrice));
+        }
     }
 }
