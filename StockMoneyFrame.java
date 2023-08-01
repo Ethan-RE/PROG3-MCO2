@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class StockMoneyFrame extends JFrame{
+public class StockMoneyFrame extends JFrame implements Observer{
     private ArrayList<Double> moneyValue;
     private ArrayList<Integer> moneyStock;
 
@@ -64,4 +64,12 @@ public class StockMoneyFrame extends JFrame{
         this.backButton.addActionListener(actionListener);
     }
 
+    public void update() {
+        // Update the money stock display for each denomination
+        for (int i = 0; i < moneyStock.size(); i++) {
+            JTextArea stockTextArea = stock.get(i);
+            int updatedStock = moneyStock.get(i);
+            stockTextArea.setText(String.valueOf(updatedStock));
+        }
+    }
 }

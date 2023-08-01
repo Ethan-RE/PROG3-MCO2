@@ -23,8 +23,12 @@ public class FactoryController {
     private StockMoneyFrame stockMoneyView;
     private SetItemPriceFrame setItemPriceView;
     private TransactionHistoryFrame transactionHistoryView;
+    private String newName;
+    private double newPrice,newCalories;
     private int selectedItemIndex;
+    private boolean hasSweet,hasSpicy,isEnough,isRegular,isSpecial;
     private List<Integer> denominations;
+    private List<Observer> observers;
     private ArrayList<String> items,optionItems,currentItems,currentItems2;
     private ArrayList<Double> prices, calories,values;
     private ArrayList<Integer> itemStocks,moneyStocks;
@@ -40,8 +44,15 @@ public class FactoryController {
 
         this.currentItems = new ArrayList<>();
         this.currentItems2 = new ArrayList<>();
+        this.optionItems = new ArrayList<>();
         this.selectedItemIndex = -1;
+        this.observers = new ArrayList<>();
         this.denominations = List.of(1,5,10,20,50,100,200,500,1000);
+        this.hasSweet = false;
+        this.hasSpicy = false;
+        this.isEnough = false;
+        this.isRegular = false;
+        this.isSpecial = false;
 
         this.items = this.vendingMachine.getItemNames();
         this.prices = this.vendingMachine.getItemPrice();
@@ -50,16 +61,23 @@ public class FactoryController {
         this.itemStocks = this.vendingMachine.getItemStock();
         this.moneyStocks = this.vendingMachine.getMoneyStock();
         this.transactions = this.vendingMachine.getTransactionHistory();
-        this.optionItems = this.specialVendingMachine.getOptionNames();
 
         this.vendView = new VendView(items,prices,calories,itemStocks);
-        this.specialVendView = new SpecialVendView(items,prices,calories,itemStocks,optionItems);
+        this.specialVendView = new SpecialVendView(items,prices,calories,itemStocks);
         this.maintView = new MaintView();
         this.stockItemView = new StockItemFrame(items,itemStocks);
         this.setItemPriceView = new SetItemPriceFrame(items, prices);
         this.stockItemView = new StockItemFrame(items,itemStocks);
         this.transactionHistoryView = new TransactionHistoryFrame(transactions);
         this.stockMoneyView = new StockMoneyFrame(values,moneyStocks);
+
+        addObserver(vendView);
+        addObserver(specialVendView);
+        addObserver(stockItemView);
+        addObserver(setItemPriceView);
+        addObserver(stockItemView);
+        addObserver(stockMoneyView);
+        addObserver(transactionHistoryView);
 
         this.factoryView.setCreateButtonListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -106,6 +124,8 @@ public class FactoryController {
                 System.out.println("Creating Machine");
                 factoryModel.createVM();
                 vendingMachine = factoryModel.getRVM();
+                isRegular = true;
+                isSpecial = false;
             }
         });
 
@@ -114,6 +134,8 @@ public class FactoryController {
                 System.out.println("Creating Special Machine");
                 factoryModel.createSVM();
                 specialVendingMachine = factoryModel.getSVM();
+                isSpecial = true;
+                isRegular = false;
             }
         });
 
@@ -133,7 +155,13 @@ public class FactoryController {
                 JFrame frame = frame3.getTestingFrame();
                 frame.setVisible(false);
                 System.out.println("frame set invisible");
-                JFrame newFrame = vendView.getRVendFrame();
+                JFrame newFrame = new JFrame();
+                if(isRegular) {
+                    newFrame = vendView.getRVendFrame();
+                }
+                else if (isSpecial){
+                    newFrame = specialVendView.getRVendFrame();
+                }
                 newFrame.setVisible(true);
                 System.out.println("frame set visible");
             }
@@ -168,71 +196,25 @@ public class FactoryController {
 
             this.vendView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    int newPrice = (int) Math.round(addPrice);
-                    String updatedPrice = toUpdate.getText();
-                    updatedPrice = updateStock(updatedPrice, newPrice);
-                    toUpdate.setText(updatedPrice);
-
-                    // Store the index of the selected item
-                    selectedItemIndex = currentItemIndex;
-
-                    // Add the selected item to the currentItems list
-                    if (selectedItemIndex >= 0 && selectedItemIndex < items.size()) {
-                        String selectedItem = items.get(selectedItemIndex);
-                        currentItems.add(selectedItem);
-                        System.out.println(selectedItem);
-                    }
+                    factoryModel.vendingItemButton(addPrice,toUpdate,items,selectedItemIndex,currentItemIndex,currentItems);
                 }
             });
         }
 
         for (int i = 0; i < denominations.size(); i++) {
             int money = denominations.get(i);
+            JTextArea temp = vendView.getMoneyTextArea();
             this.vendView.setMoneyButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    JTextArea temp = vendView.getMoneyTextArea();
-                    String holder = temp.getText();
-
-                    holder = updateStock(holder,money);
-
-                    temp.setText(holder);
+                    factoryModel.vendingMoneyButton(temp,money);
                 }
             });
         }
 
         this.vendView.setBuyButtonListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Iterate through the currentItems list and update the stock for each item
-                for (int i = 0; i < currentItems.size(); i++) {
-                    JTextArea temp = vendView.getStockTextArea(i);
-                    for(int j = 0;j < items.size();j++){
-                        String currentItem = currentItems.get(i);
-                        String possibleItem = items.get(j);
-                        if (currentItem.equals(possibleItem)) {
-                            // Update the stock for the current item
-                            int currentStock = itemStocks.get(j);
-                            currentStock -= 1;
-                            itemStocks.set(j, currentStock);
-                            temp.setText(Integer.toString(currentStock));
-                            System.out.println(currentItem + " bought");
-                        }
-                    }
-                }
-
-                // Update the money
-                JTextArea priceTA = vendView.getPriceTextArea();
-                JTextArea moneyTA = vendView.getMoneyTextArea();
-                String priceS = priceTA.getText();
-                String moneyS = moneyTA.getText();
-                int price = Integer.parseInt(priceS);
-                price = price * -1;
-                moneyS = updateStock(moneyS, price);
-                priceS = updateStock(priceS, price);
-                priceTA.setText(priceS);
-                moneyTA.setText(moneyS);
-
-                // Clear the currentItems list after the purchase is completed
-                currentItems.clear();
+                factoryModel.buyItemButton(vendView,currentItems,items,itemStocks);
+                notifyObservers();
             }
         });
 
@@ -257,69 +239,25 @@ public class FactoryController {
 
             this.specialVendView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    int newPrice = (int) Math.round(addPrice);
-                    String updatedPrice = toUpdate.getText();
-                    updatedPrice = updateStock(updatedPrice, newPrice);
-                    toUpdate.setText(updatedPrice);
-
-                    // Store the index of the selected item
-                    selectedItemIndex = currentItemIndex;
-
-                    // Add the selected item to the currentItems list
-                    if (selectedItemIndex >= 0 && selectedItemIndex < items.size()) {
-                        String selectedItem = items.get(selectedItemIndex);
-                        currentItems.add(selectedItem);
-                    }
+                    factoryModel.vendingItemButton(addPrice,toUpdate,items,selectedItemIndex,currentItemIndex,currentItems);
                 }
             });
         }
 
         for (int i = 0; i < denominations.size(); i++) {
             int money = denominations.get(i);
+            JTextArea temp = specialVendView.getMoneyTextArea();
             this.specialVendView.setMoneyButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    JTextArea temp = specialVendView.getMoneyTextArea();
-                    String holder = temp.getText();
-
-                    holder = updateStock(holder,money);
-
-                    temp.setText(holder);
+                    factoryModel.vendingMoneyButton(temp,money);
                 }
             });
         }
 
         this.specialVendView.setBuyButtonListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Iterate through the currentItems list and update the stock for each item
-                for (int i = 0; i < currentItems.size(); i++) {
-                    JTextArea temp = specialVendView.getStockTextArea(i);
-                    String currentItem = currentItems.get(i);
-
-                    // Find the index of the current item in the items list
-                    int itemIndex = items.indexOf(currentItem);
-                    if (itemIndex != -1) {
-                        // Update the stock for the current item
-                        int currentStock = itemStocks.get(itemIndex);
-                        currentStock -= 1;
-                        itemStocks.set(itemIndex, currentStock);
-                        temp.setText(Integer.toString(currentStock));
-                    }
-                }
-
-                // Update the money
-                JTextArea priceTA = specialVendView.getPriceTextArea();
-                JTextArea moneyTA = specialVendView.getMoneyTextArea();
-                String priceS = priceTA.getText();
-                String moneyS = moneyTA.getText();
-                int price = Integer.parseInt(priceS);
-                price = price * -1;
-                moneyS = updateStock(moneyS, price);
-                priceS = updateStock(priceS, price);
-                priceTA.setText(priceS);
-                moneyTA.setText(moneyS);
-
-                // Clear the currentItems list after the purchase is completed
-                currentItems.clear();
+                factoryModel.buyItemButton(vendView,currentItems,items,itemStocks);
+                notifyObservers();
             }
         });
 
@@ -329,6 +267,48 @@ public class FactoryController {
                 temp.setVisible(false);
                 JPanel holder = specialVendView.getSpecialPanel();
                 holder.setVisible(true);
+                JTextArea basket = specialVendView.getBasket();
+                basket.setVisible(true);
+            }
+        });
+
+        this.specialVendView.setBeefButtonListener(new ActionListener(){
+            JTextArea basket = specialVendView.getBasket();
+            public void actionPerformed(ActionEvent e){
+                factoryModel.specialVendBeefButton(optionItems,basket);
+            }
+        });
+
+        this.specialVendView.setSpicySButtonListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                factoryModel.specialVendSauceButton(optionItems,specialVendView,hasSpicy,hasSweet,"Spicy sauce");
+            }
+        });
+
+        this.specialVendView.setSweetSButtonListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e) {
+                factoryModel.specialVendSauceButton(optionItems,specialVendView,hasSweet,hasSpicy,"Sweet sauce");
+            }
+        });
+
+        this.specialVendView.setPeasButtonListener(new ActionListener(){
+            JTextArea basket = specialVendView.getBasket();
+            public void actionPerformed(ActionEvent e){
+                factoryModel.specialVendExtraButton(optionItems,basket,"Peas");
+            }
+        });
+
+        this.specialVendView.setEggsButtonListener(new ActionListener(){
+            JTextArea basket = specialVendView.getBasket();
+            public void actionPerformed(ActionEvent e){
+                factoryModel.specialVendExtraButton(optionItems,basket,"Eggs");
+            }
+        });
+
+        this.specialVendView.setConfirmBasketButtonListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                factoryModel.specialVendConfirmButton(specialVendView,specialVendingMachine,optionItems,items);
+                notifyObservers();
             }
         });
 
@@ -353,21 +333,7 @@ public class FactoryController {
 
         this.setItemPriceView.setInputTextListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                System.out.println("entering input");
-                JTextField temp = setItemPriceView.getInput();
-                String holder = temp.getText();
-                double updatePrice = Double.parseDouble(holder);
-
-
-                // Update the price for the selected item
-                if (selectedItemIndex >= 0 && selectedItemIndex < items.size()) {
-                    prices.set(selectedItemIndex, updatePrice);
-                    String newPrice = String.valueOf(updatePrice);
-                    JTextArea updater = setItemPriceView.getPrice(selectedItemIndex);
-                    updater.setText(newPrice);
-                    temp.setVisible(false);
-                    System.out.println("price updated");
-                }
+                factoryModel.inputTextListener(setItemPriceView,selectedItemIndex,items,prices);
             }
         });
 
@@ -375,16 +341,8 @@ public class FactoryController {
             int currentItemIndex = i;
             this.setItemPriceView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    JPanel temp = setItemPriceView.getInputPanel();
-                    temp.setVisible(true);
-                    selectedItemIndex = currentItemIndex;
-
-                    // Add the selected item to the currentItems list
-                    if (selectedItemIndex >= 0 && selectedItemIndex < items.size()) {
-                        String selectedItem = items.get(selectedItemIndex);
-                        currentItems2.add(selectedItem);
-                    }
-                    System.out.println("textbox opened");
+                    factoryModel.setItemPriceButton(setItemPriceView,selectedItemIndex,currentItemIndex,items,currentItems2);
+                    notifyObservers();
                 }
             });
         }
@@ -398,18 +356,78 @@ public class FactoryController {
 
         for(int i = 0; i < items.size(); i++) {
             JTextArea temp = stockItemView.getStock(i);
+            ArrayList<ItemStack> itemTypes = vendingMachine.getItemTypes();
             int currentItem = i;
+            ItemStack currentStack = itemTypes.get(i);
             this.stockItemView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    String holder = temp.getText();
-                    int j = 1;
-                    holder = updateStock(holder,j);
-                    temp.setText(holder);
-                    int k = Integer.parseInt(holder);
-                    itemStocks.set(currentItem,k);
+                    factoryModel.setStockItemButton(temp,itemStocks,currentItem,currentStack);
+                    notifyObservers();
                 }
             });
         }
+
+        this.stockItemView.setAddNewItemButtonListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                JButton temp = stockItemView.getAddNewItemButton();
+                temp.setVisible(false);
+                JPanel holder = stockItemView.getInputPanel();
+                holder.setVisible(true);
+            }
+        });
+
+        this.stockItemView.setNameTextListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Get user input for new item name
+                JTextField name = stockItemView.getNewName();
+                newName = name.getText();
+            }
+        });
+
+        this.stockItemView.setPriceTextListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Get user input for new item price
+                JTextField price = stockItemView.getNewPrice();
+                String priceString = price.getText();
+                try {
+                    newPrice = Double.parseDouble(priceString);
+                } catch (NumberFormatException ex) {
+                    // Handle invalid input if needed
+                    // For example, show an error message to the user
+                }
+            }
+        });
+
+        this.stockItemView.setCaloriesTextListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Get user input for new item calories
+                JTextField calories = stockItemView.getNewCalories();
+                String caloriesString = calories.getText();
+                try {
+                    newCalories = Double.parseDouble(caloriesString);
+                } catch (NumberFormatException ex) {
+                    // Handle invalid input if needed
+                    // For example, show an error message to the user
+                }
+            }
+        });
+
+        this.stockItemView.setFinishButtonListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Add the new item to the vending machine
+                Item item = new Item(newName, newPrice, newCalories);
+                vendingMachine.addNewItemStack(item);
+
+                // Notify the observers about the changes
+                notifyObservers();
+
+                // Hide the input panel and show the "Add New Item" button again
+                JPanel holder = stockItemView.getInputPanel();
+                holder.setVisible(false);
+                JButton temp = stockItemView.getAddNewItemButton();
+                temp.setVisible(true);
+            }
+        });
 
         this.stockItemView.setBackButtonListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -422,10 +440,8 @@ public class FactoryController {
             JTextArea temp = stockMoneyView.getStock(i);
             this.stockMoneyView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    String holder = temp.getText();
-                    int j = 1;
-                    holder = updateStock(holder,j);
-                    temp.setText(holder);
+                    factoryModel.setStockMoneyButton(temp);
+                    notifyObservers();
                 }
             });
         }
@@ -496,5 +512,22 @@ public class FactoryController {
         i = i + j;
         String holder = String.valueOf(i);
         return holder;
+    }
+
+    // Method to add observers to the list
+    public void addObserver(Observer observer) {
+        observers.add(observer);
+    }
+
+    // Method to remove observers from the list
+    public void removeObserver(Observer observer) {
+        observers.remove(observer);
+    }
+
+    // Method to notify all observers of changes
+    private void notifyObservers() {
+        for (Observer observer : observers) {
+            observer.update();
+        }
     }
 }
