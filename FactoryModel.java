@@ -1,4 +1,5 @@
 import VendingMachine.*;
+import VendingMachine.SpecialVendingMachine;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.InputMismatchException;
@@ -57,10 +58,14 @@ public class FactoryModel {
         temp.setText(holder);
     }
 
-    public void buyItemButton(VendView vendView,ArrayList<String> currentItems,ArrayList<String> items,ArrayList<Integer> itemStocks){
+    public void buyItemButton(boolean isRegular,boolean isSpecial, SpecialVendView specialVendView, VendView vendView,ArrayList<String> currentItems,ArrayList<String> items,ArrayList<Integer> itemStocks,VendingMachine vendingMachine,SpecialVendingMachine specialVendingMachine){
         // Iterate through the currentItems list and update the stock for each item
         for (int i = 0; i < currentItems.size(); i++) {
-            JTextArea temp = vendView.getStockTextArea(i);
+            JTextArea temp = new JTextArea();
+            if(isRegular)
+                temp = vendView.getStockTextArea(i);
+            else if(isSpecial)
+                temp = specialVendView.getStockTextArea(i);
             for(int j = 0;j < items.size();j++){
                 String currentItem = currentItems.get(i);
                 String possibleItem = items.get(j);
@@ -76,11 +81,59 @@ public class FactoryModel {
         }
 
         // Update the money
-        JTextArea priceTA = vendView.getPriceTextArea();
-        JTextArea moneyTA = vendView.getMoneyTextArea();
+        JTextArea priceTA = new JTextArea();
+        JTextArea moneyTA = new JTextArea();
+        if(isRegular) {
+            priceTA = vendView.getPriceTextArea();
+            moneyTA = vendView.getMoneyTextArea();
+        }
+        else if(isSpecial){
+            priceTA = specialVendView.getPriceTextArea();
+            moneyTA = specialVendView.getMoneyTextArea();
+        }
         String priceS = priceTA.getText();
         String moneyS = moneyTA.getText();
         int price = Integer.parseInt(priceS);
+        double dPrice = price;
+        double dMoney = Double.parseDouble(moneyS);
+
+        CashRegister cashRegister = new CashRegister();
+        ArrayList<Transaction> transHistory = new ArrayList<>();
+
+        if(isRegular){
+            cashRegister = vendingMachine.getCashHander();
+            transHistory = vendingMachine.getTransHistory();
+        }
+        else if (isSpecial){
+            cashRegister = specialVendingMachine.getCashHander();
+            transHistory = specialVendingMachine.getTransHistory();
+        }
+
+        ArrayList<MoneyStack> held = cashRegister.calculateChange(dPrice,dMoney);
+
+        for(int i = 0;i < currentItems.size();i++){
+            ArrayList<ItemStack> hold = new ArrayList<>();
+            Double totalChange = 0.0;
+            if(isRegular){
+                hold = vendingMachine.getItemTypes();
+            }
+            else if (isSpecial){
+                hold = specialVendingMachine.getItemTypes();
+            }
+            Item item = hold.get(i).getItem();
+
+            for(int j = 0;j < held.size();j++){
+                Double change = held.get(i).getValue();
+                totalChange = totalChange + change;
+            }
+
+            Transaction temporary = new Transaction(dPrice,totalChange,item);
+            transHistory.add(temporary);
+        }
+
+        ArrayList<Integer> hold = cashRegister.getMoneyStock();
+        vendingMachine.stockMoney(hold);
+
         price = price * -1;
         moneyS = updateStock(moneyS, price);
         priceS = updateStock(priceS, price);
@@ -127,7 +180,7 @@ public class FactoryModel {
         basket.append(item);
     }
 
-    public void specialVendConfirmButton(SpecialVendView specialVendView,SpecialVendingMachine specialVendingMachine,ArrayList<String> optionItems,ArrayList<String> items){
+    public void specialVendConfirmButton(SpecialVendView specialVendView,SpecialVendingMachine specialVendingMachine,ArrayList<String> optionItems,ArrayList<String> items,JTextArea clear){
         JPanel specialPanel = specialVendView.getSpecialPanel();
         specialPanel.setVisible(false);
         JTextArea cooking = specialVendView.getCooking();
@@ -146,6 +199,8 @@ public class FactoryModel {
                 }
             }
         }
+
+        clear.setText("");
 
         Timer timer = new Timer(delay, new ActionListener(){
             public void actionPerformed(ActionEvent e){
@@ -200,27 +255,103 @@ public class FactoryModel {
         System.out.println("textbox opened");
     }
 
-    public void setStockItemButton(JTextArea temp,ArrayList<Integer> itemStocks,int currentItem,ItemStack currentStack){
+    public void setStockItemButton(JTextArea temp,ArrayList<Integer> itemStocks,int currentItem,ItemStack currentStack,boolean isRegular,boolean isSpecial,VendingMachine vendingMachine,SpecialVendingMachine sVendingMachine){
         String holder = temp.getText();
-        int j = 1;
-        holder = updateStock(holder,j);
+        holder = updateStock(holder,1);
         temp.setText(holder);
         int k = Integer.parseInt(holder);
         itemStocks.set(currentItem,k);
         currentStack.pushItem();
+        if(isRegular)
+            vendingMachine.stockItem(currentItem,1);
+        else if(isSpecial)
+            sVendingMachine.stockItem(currentItem,1);
     }
 
-    public void setStockMoneyButton(JTextArea temp){
-        String holder = temp.getText();
-        int j = 1;
-        holder = updateStock(holder,j);
-        temp.setText(holder);
+    public void setStockMoneyButton(boolean isRegular,boolean isSpecial,VendingMachine vendingMachine,SpecialVendingMachine specialVendingMachine,ArrayList<Integer> money,ArrayList<JTextArea> temp){
+        CashRegister cashRegister = new CashRegister();
+
+        if(isRegular){
+            cashRegister = vendingMachine.getCashHander();
+        }
+        else if (isSpecial){
+            cashRegister = specialVendingMachine.getCashHander();
+        }
+
+        cashRegister.stockInternal(money);
+
+        for(int i = 0;i < temp.size();i++) {
+            JTextArea hold = temp.get(i);
+            String holder = hold.getText();
+            int j = 1;
+            holder = updateStock(holder, j);
+            hold.setText(holder);
+        }
     }
 
-    public VendingMachine getRVM(){
+    public void setCollectMoneyButton(boolean isRegular,boolean isSpecial,VendingMachine vendingMachine,SpecialVendingMachine specialVendingMachine,CollectMoneyFrame collectMoneyView){
+        ArrayList<Money> temp = new ArrayList<>();
+
+        System.out.println("dispensing money");
+
+        if(isRegular){
+            System.out.println("Regukar");
+            temp = vendingMachine.collectMoney();
+        }
+        else if(isSpecial){
+            System.out.println("speecial");
+            temp = specialVendingMachine.collectMoney();
+        }
+
+        ArrayList<Double> holder = new ArrayList<>();
+
+        for(int i = 0;i < temp.size();i++){
+            holder.add(temp.get(i).getValue());
+        }
+
+        JTextArea hold = collectMoneyView.getCollected();
+        for(int i = 0;i < holder.size();i++) {
+            String held = String.valueOf(holder.get(i));
+            System.out.println("Collected " + held);
+            hold.append(held);
+        }
+    }
+
+    public VendingMachine getRVM(ArrayList<String> items,ArrayList<Double> prices,ArrayList<Double> calories,ArrayList<Double> values,ArrayList<Integer> itemStocks, ArrayList<Integer> moneyStocks,ArrayList<String> transactions,
+                                 VendView vendView,SpecialVendView specialVendView,MaintView maintView,StockItemFrame stockItemView,SetItemPriceFrame setItemPriceView,TransactionHistoryFrame transactionHistoryView,StockMoneyFrame stockMoneyView){
+        items = this.vm.getItemNames();
+        prices = this.vm.getItemPrice();
+        calories = this.vm.getItemCalories();
+        values = this.vm.getMoneyValue();
+        itemStocks = this.vm.getItemStock();
+        moneyStocks = this.vm.getMoneyStock();
+        transactions = this.vm.getTransactionHistory();
+        vendView = new VendView(items,prices,calories,itemStocks);
+        specialVendView = new SpecialVendView(items,prices,calories,itemStocks);
+        maintView = new MaintView();
+        stockItemView = new StockItemFrame(items,itemStocks);
+        setItemPriceView = new SetItemPriceFrame(items, prices);
+        transactionHistoryView = new TransactionHistoryFrame(transactions);
+        stockMoneyView = new StockMoneyFrame(values,moneyStocks);
         return this.vm;
     }
-    public SpecialVendingMachine getSVM() {return this.svm; }
+    public SpecialVendingMachine getSVM(ArrayList<String> items,ArrayList<Double> prices,ArrayList<Double> calories,ArrayList<Double> values,ArrayList<Integer> itemStocks, ArrayList<Integer> moneyStocks,ArrayList<String> transactions,
+                                        VendView vendView,SpecialVendView specialVendView,MaintView maintView,StockItemFrame stockItemView,SetItemPriceFrame setItemPriceView,TransactionHistoryFrame transactionHistoryView,StockMoneyFrame stockMoneyView) {
+        items = this.svm.getItemNames();
+        prices = this.svm.getItemPrice();
+        calories = this.svm.getItemCalories();
+        values = this.svm.getMoneyValue();
+        itemStocks = this.svm.getItemStock();
+        moneyStocks = this.svm.getMoneyStock();
+        transactions = this.svm.getTransactionHistory();
+        vendView = new VendView(items,prices,calories,itemStocks);
+        specialVendView = new SpecialVendView(items,prices,calories,itemStocks);
+        maintView = new MaintView();
+        stockItemView = new StockItemFrame(items,itemStocks);
+        setItemPriceView = new SetItemPriceFrame(items, prices);
+        transactionHistoryView = new TransactionHistoryFrame(transactions);
+        stockMoneyView = new StockMoneyFrame(values,moneyStocks);
+        return this.svm; }
 
     private String updateStock(String string,int j){
         int i = Integer.parseInt(string);

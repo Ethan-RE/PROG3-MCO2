@@ -38,6 +38,9 @@ public class TransactionHistoryFrame extends JFrame implements Observer{
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
         setVisible(false);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     public void addTransaction(String transactionDetails) {

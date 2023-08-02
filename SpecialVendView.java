@@ -98,4 +98,5 @@ public class SpecialVendView extends VendView {
     public void setEggsButtonListener(ActionListener actionListener){
         this.eggs.addActionListener(actionListener);
     }
+
 }

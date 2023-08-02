@@ -159,6 +159,8 @@ public class VendingMachine {
         return items;
     }
 
+    public ArrayList<Transaction> getTransHistory(){return this.transactions;}
+
     public ArrayList<Integer> getMoneyStock() {
         return this.cashHandler.getMoneyStock();
     }
@@ -166,4 +168,6 @@ public class VendingMachine {
     public ArrayList<Double> getMoneyValue() {
         return this.cashHandler.getMoneyValue();
     }
+
+    public CashRegister getCashHander(){ return this.cashHandler;}
 }

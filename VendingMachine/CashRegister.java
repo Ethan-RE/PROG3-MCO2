@@ -57,10 +57,11 @@ public class CashRegister{
      * @return array of MoneyStack given as change
      */
     public ArrayList<MoneyStack> calculateChange(double price, double value) {
+        System.out.println("cahnge calc");
         this.change = price-value;
         this.price = price;
         this.value = value;
-        ArrayList<MoneyStack> change = null;
+        ArrayList<MoneyStack> change = new ArrayList<>();
         for(int i = 0 ; i<this.internalBank.size() ; i++) {
             change.add(new MoneyStack(this.internalBank.get(i).getNumMoney()));
             while(value>this.internalBank.get(i).getValue()&&this.internalBank.get(i).getNumMoney()>0) {
@@ -76,9 +77,9 @@ public class CashRegister{
                     this.internalBank.get(i).pushMoney();
                 }
             }
-            return null;
+            return change;
         }
-
+        
         return change;
     }
 

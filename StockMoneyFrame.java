@@ -10,8 +10,8 @@ public class StockMoneyFrame extends JFrame implements Observer{
     private ArrayList<Integer> moneyStock;
 
     private ArrayList<JButton> buttons;
-    private ArrayList<JTextArea> stock;
-    private JButton backButton;
+    private ArrayList<JTextArea> stock,denominations;
+    private JButton backButton,restock;
 
     public StockMoneyFrame(ArrayList<Double> money, ArrayList<Integer> moneyStock) {
         JPanel mainPanel = new JPanel();
@@ -20,6 +20,12 @@ public class StockMoneyFrame extends JFrame implements Observer{
         this.moneyStock = moneyStock;
         this.buttons = new ArrayList<>();
         this.stock = new ArrayList<>();
+        this.denominations = new ArrayList<>();
+
+        this.restock = new JButton("Restock");
+        JPanel stockPanel = new JPanel();
+        stockPanel.add(restock);
+        mainPanel.add(stockPanel);
 
         ArrayList<JPanel> moneyPanels = new ArrayList<>();
 
@@ -27,13 +33,13 @@ public class StockMoneyFrame extends JFrame implements Observer{
             String temp = "Bill: " + this.moneyValue.get(i);
             String temp2 = String.valueOf(this.moneyStock.get(i));
 
-            this.buttons.add(new JButton(temp));
+            this.denominations.add(new JTextArea(temp));
             this.stock.add(new JTextArea(temp2));
             this.stock.get(i).setEditable(false);
 
             moneyPanels.add(new JPanel());
             moneyPanels.get(i).setLayout(new BoxLayout(moneyPanels.get(i), BoxLayout.X_AXIS));
-            moneyPanels.get(i).add(this.buttons.get(i));
+            moneyPanels.get(i).add(this.denominations.get(i));
             moneyPanels.get(i).add(this.stock.get(i));
             mainPanel.add(moneyPanels.get(i));
         }
@@ -49,10 +55,17 @@ public class StockMoneyFrame extends JFrame implements Observer{
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
         setVisible(false);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
-    public JTextArea getStock(int index){
-        return this.stock.get(index);
+    public ArrayList<JTextArea> getStock(){
+        return this.stock;
+    }
+
+    public void setRestockButtonListener(ActionListener actionListener){
+        this.restock.addActionListener(actionListener);
     }
 
     public void setItemButtonListener(int index, ActionListener actionListener){

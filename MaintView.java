@@ -10,7 +10,7 @@ import java.awt.event.ActionListener;
 
 public class MaintView extends JFrame{
     private VendingMachine vendingMachine;
-    private JButton setPriceButton,stockItemButton,stockMoneyButton,transHistoryButton,backButton;
+    private JButton setPriceButton,stockItemButton,stockMoneyButton,collectMoneyButton,transHistoryButton,backButton;
 
     public MaintView(){
         super("Vending Machine Maintenance");
@@ -23,11 +23,13 @@ public class MaintView extends JFrame{
         this.setPriceButton = new JButton("Set Item Prices");
         this.stockItemButton = new JButton("Stock Items");
         this.stockMoneyButton = new JButton("Stock Money");
+        this.collectMoneyButton = new JButton("Collect Money");
         this.transHistoryButton = new JButton("Transaction History");
         
         add(setPriceButton);
         add(stockItemButton);
         add(stockMoneyButton);
+        add(collectMoneyButton);
         add(transHistoryButton);
         add(backButton);
 
@@ -44,6 +46,10 @@ public class MaintView extends JFrame{
     
     public void setStockMoneyButton(ActionListener actionListener){
         this.stockMoneyButton.addActionListener(actionListener);
+    }
+
+    public void setCollectMoneyButton(ActionListener actionlistener){
+        this.collectMoneyButton.addActionListener(actionlistener);
     }
     
     public void setTransHistoryButton(ActionListener actionListener) {
