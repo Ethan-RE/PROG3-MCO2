@@ -30,7 +30,7 @@ public class FactoryController {
     private boolean hasSweet,hasSpicy,isEnough,isRegular,isSpecial;
     private List<Integer> denominations;
     private List<Observer> observers;
-    private ArrayList<String> items,optionItems,currentItems,currentItems2;
+    private ArrayList<String> items,displayItems,optionItems,currentItems,currentItems2;
     private ArrayList<Double> prices, calories,values;
     private ArrayList<Integer> itemStocks,moneyStocks;
     private ArrayList<String> transactions;
@@ -54,6 +54,7 @@ public class FactoryController {
         this.isRegular = false;
         this.isSpecial = false;
 
+        this.displayItems = this.specialVendingMachine.getOptionNames();
         this.items = this.specialVendingMachine.getItemNames();
         this.prices = this.specialVendingMachine.getItemPrice();
         this.calories = this.specialVendingMachine.getItemCalories();
@@ -62,7 +63,7 @@ public class FactoryController {
         this.moneyStocks = this.specialVendingMachine.getMoneyStock();
         this.transactions = this.vendingMachine.getTransactionHistory();
 
-        this.vendView = new VendView(items,prices,calories,itemStocks);
+        this.vendView = new VendView(displayItems,prices,calories,itemStocks);
         this.specialVendView = new SpecialVendView(items,prices,calories,itemStocks);
         this.maintView = new MaintView();
         this.stockItemView = new StockItemFrame(items,itemStocks);
@@ -191,7 +192,7 @@ public class FactoryController {
             }
         });
 
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < displayItems.size(); i++) {
             JTextArea temp = vendView.getDisplayPriceTextArea(i);
             JTextArea toUpdate = vendView.getPriceTextArea();
             String priceText = temp.getText();
