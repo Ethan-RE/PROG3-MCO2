@@ -63,6 +63,9 @@ public class SetItemPriceFrame extends JFrame implements Observer{
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
         setVisible(false);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
     public JTextArea getPrice(int index){

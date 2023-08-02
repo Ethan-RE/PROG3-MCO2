@@ -5,19 +5,21 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
-public class StockItemFrame extends JFrame implements Observer{
+public class StockItemFrame extends JFrame implements Observer {
 
     private ArrayList<String> itemNames;
     private ArrayList<Integer> itemStock;
     private ArrayList<JButton> buttons;
     private ArrayList<JTextArea> stock;
-    private JTextField name,price,calories;
-    private JPanel inputPanel;
-    private JButton backButton,addNewItemButton,finishButton;
+    private JTextField name, price, calories;
+    private JPanel inputPanel, mainPanel;
+    private JButton backButton, addNewItemButton, finishButton;
 
-    public StockItemFrame (ArrayList<String> itemNames, ArrayList<Integer> itemStock) {
+    public StockItemFrame(ArrayList<String> itemNames, ArrayList<Integer> itemStock) {
         super("Stock Items");
+
         this.buttons = new ArrayList<JButton>();
+        this.buttons.clear();
         this.itemNames = itemNames;
         this.itemStock = itemStock;
 
@@ -25,12 +27,14 @@ public class StockItemFrame extends JFrame implements Observer{
         this.price = new JTextField(10);
         this.calories = new JTextField(10);
 
-        stock = new ArrayList<>();
-        JPanel mainPanel = new JPanel();
+        this.stock = new ArrayList<>();
+        this.stock.clear();
+        this.mainPanel = new JPanel();
+        this.mainPanel.removeAll();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         ArrayList<JPanel> items = new ArrayList<>();
 
-        for(int i=0 ; i<this.itemNames.size() ; i++) {
+        for (int i = 0; i < this.itemNames.size(); i++) {
             String temp = this.itemNames.get(i);
             JButton holder = new JButton(temp);
             String temp2 = String.valueOf(this.itemStock.get(i));
@@ -43,9 +47,10 @@ public class StockItemFrame extends JFrame implements Observer{
             items.get(i).setLayout(new BoxLayout(items.get(i), BoxLayout.X_AXIS));
             items.get(i).add(this.buttons.get(i));
             items.get(i).add(stock.get(i));
+            System.out.println(temp + " button added");
         }
 
-        for(JPanel panel : items) {
+        for (JPanel panel : items) {
             mainPanel.add(panel);
         }
         this.addNewItemButton = new JButton("Add New Item");
@@ -73,31 +78,61 @@ public class StockItemFrame extends JFrame implements Observer{
         setLayout(new FlowLayout(FlowLayout.CENTER));
         setSize(250, 400);
         setVisible(false);
+
+        mainPanel.revalidate();
+        mainPanel.repaint();
     }
 
-    public JTextArea getStock(int index){
+    public JTextArea getStock(int index) {
         return this.stock.get(index);
     }
-    public JButton getAddNewItemButton() {return this.addNewItemButton;}
-    public JPanel getInputPanel(){return this.inputPanel;}
-    public JTextField getNewName(){return this.name;}
-    public JTextField getNewPrice(){return this.price;}
-    public JTextField getNewCalories(){return this.calories;}
 
-    public void setNameTextListener(ActionListener actionListener){this.name.addActionListener(actionListener);}
-    public void setPriceTextListener(ActionListener actionListener){this.price.addActionListener(actionListener);}
-    public void setCaloriesTextListener(ActionListener actionListener){this.calories.addActionListener(actionListener);}
-    public void setFinishButtonListener(ActionListener actionListener){this.finishButton.addActionListener(actionListener);}
+    public JButton getAddNewItemButton() {
+        return this.addNewItemButton;
+    }
 
-    public void setAddNewItemButtonListener(ActionListener actionListener){
+    public JPanel getInputPanel() {
+        return this.inputPanel;
+    }
+
+    public JTextField getNewName() {
+        return this.name;
+    }
+
+    public JTextField getNewPrice() {
+        return this.price;
+    }
+
+    public JTextField getNewCalories() {
+        return this.calories;
+    }
+
+    public void setNameTextListener(ActionListener actionListener) {
+        this.name.addActionListener(actionListener);
+    }
+
+    public void setPriceTextListener(ActionListener actionListener) {
+        this.price.addActionListener(actionListener);
+    }
+
+    public void setCaloriesTextListener(ActionListener actionListener) {
+        this.calories.addActionListener(actionListener);
+    }
+
+    public void setFinishButtonListener(ActionListener actionListener) {
+        this.finishButton.addActionListener(actionListener);
+    }
+
+    public void setAddNewItemButtonListener(ActionListener actionListener) {
         this.addNewItemButton.addActionListener(actionListener);
     }
-    public void setItemButtonListener(int index, ActionListener actionListener){
+
+    public void setItemButtonListener(int index, ActionListener actionListener) {
         JButton temp = this.buttons.get(index);
         temp.addActionListener(actionListener);
     }
 
-    public void setBackButtonListener(ActionListener actionListener){
+    public void setBackButtonListener(ActionListener actionListener) {
         this.backButton.addActionListener(actionListener);
     }
 
@@ -107,4 +142,6 @@ public class StockItemFrame extends JFrame implements Observer{
             stock.get(i).setText(String.valueOf(itemStock.get(i)));
         }
     }
+
 }
+

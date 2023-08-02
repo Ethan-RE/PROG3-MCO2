@@ -12,6 +12,7 @@ public class VendView extends JFrame implements Observer{
     protected JFrame rVendFrame;
     protected JButton buyButton,backButton;
     protected JTextArea money,price,change;
+    protected JPanel mainPanel;
     protected ArrayList<JTextArea> displayPrices,displayCalories,displayStock;
     protected ArrayList<JButton> buttons,moneyButtons;
     protected List<String> denominations,items;
@@ -37,7 +38,7 @@ public class VendView extends JFrame implements Observer{
         this.items = items;
         this.denominations = List.of("One","Five","Ten","Twenty","Fifty","One Hundred","Two Hundred","Five Hundred","One Thousand");
 
-        JPanel mainPanel = new JPanel();
+        this.mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout(FlowLayout.CENTER));

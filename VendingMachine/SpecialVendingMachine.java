@@ -12,15 +12,15 @@ public class SpecialVendingMachine extends VendingMachine {
 
         options.addAll(itemTypes);
 
-        this.options.add(new ItemStack(new Item(
+        this.itemTypes.add(new ItemStack(new Item(
                 "Brown Sugar",5,10
         )));
 
-        this.options.add(new ItemStack(new Item(
+        this.itemTypes.add(new ItemStack(new Item(
                 "Garlic",10,6
         )));
 
-        this.options.add(new ItemStack (new Item(
+        this.itemTypes.add(new ItemStack (new Item(
             "Ginger",10,2
         )));
     }
@@ -37,8 +37,10 @@ public class SpecialVendingMachine extends VendingMachine {
             ItemStack temp = itemTypes.get(i);
             Item held = temp.popItem();
             String name = held.getName();
-            if(name != holder.get(i))
-                temp.pushItem();
+            for(int j = 0;j < holder.size();j++){
+                if(name != holder.get(j))
+                    temp.pushItem();
+            }
         }
 
         this.specialOrder = new SpecialItem(ingredients);

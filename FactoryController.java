@@ -23,13 +23,14 @@ public class FactoryController {
     private StockMoneyFrame stockMoneyView;
     private SetItemPriceFrame setItemPriceView;
     private TransactionHistoryFrame transactionHistoryView;
+    private CollectMoneyFrame collectMoneyView;
     private String newName;
     private double newPrice,newCalories;
     private int selectedItemIndex;
     private boolean hasSweet,hasSpicy,isEnough,isRegular,isSpecial;
     private List<Integer> denominations;
     private List<Observer> observers;
-    private ArrayList<String> items,optionItems,currentItems,currentItems2;
+    private ArrayList<String> items,displayItems,optionItems,currentItems,currentItems2;
     private ArrayList<Double> prices, calories,values;
     private ArrayList<Integer> itemStocks,moneyStocks;
     private ArrayList<String> transactions;
@@ -50,19 +51,19 @@ public class FactoryController {
         this.denominations = List.of(1,5,10,20,50,100,200,500,1000);
         this.hasSweet = false;
         this.hasSpicy = false;
-        this.isEnough = false;
         this.isRegular = false;
         this.isSpecial = false;
 
-        this.items = this.vendingMachine.getItemNames();
-        this.prices = this.vendingMachine.getItemPrice();
-        this.calories = this.vendingMachine.getItemCalories();
+        this.displayItems = this.specialVendingMachine.getOptionNames();
+        this.items = this.specialVendingMachine.getItemNames();
+        this.prices = this.specialVendingMachine.getItemPrice();
+        this.calories = this.specialVendingMachine.getItemCalories();
         this.values = this.vendingMachine.getMoneyValue();
-        this.itemStocks = this.vendingMachine.getItemStock();
-        this.moneyStocks = this.vendingMachine.getMoneyStock();
+        this.itemStocks = this.specialVendingMachine.getItemStock();
+        this.moneyStocks = this.specialVendingMachine.getMoneyStock();
         this.transactions = this.vendingMachine.getTransactionHistory();
 
-        this.vendView = new VendView(items,prices,calories,itemStocks);
+        this.vendView = new VendView(displayItems,prices,calories,itemStocks);
         this.specialVendView = new SpecialVendView(items,prices,calories,itemStocks);
         this.maintView = new MaintView();
         this.stockItemView = new StockItemFrame(items,itemStocks);
@@ -70,6 +71,7 @@ public class FactoryController {
         this.stockItemView = new StockItemFrame(items,itemStocks);
         this.transactionHistoryView = new TransactionHistoryFrame(transactions);
         this.stockMoneyView = new StockMoneyFrame(values,moneyStocks);
+        this.collectMoneyView = new CollectMoneyFrame();
 
         addObserver(vendView);
         addObserver(specialVendView);
@@ -123,9 +125,11 @@ public class FactoryController {
             public void actionPerformed(ActionEvent e){
                 System.out.println("Creating Machine");
                 factoryModel.createVM();
-                vendingMachine = factoryModel.getRVM();
-                isRegular = true;
-                isSpecial = false;
+                vendingMachine = factoryModel.getRVM(FactoryController.this.items,FactoryController.this.prices,FactoryController.this.calories,FactoryController.this.values,FactoryController.this.itemStocks,FactoryController.this.moneyStocks,FactoryController.this.transactions,
+                        FactoryController.this.vendView,FactoryController.this.specialVendView,FactoryController.this.maintView,FactoryController.this.stockItemView,FactoryController.this.setItemPriceView,FactoryController.this.transactionHistoryView,FactoryController.this.stockMoneyView);
+                FactoryController.this.isRegular = true;
+                FactoryController.this.isSpecial = false;
+                notifyObservers();
             }
         });
 
@@ -133,9 +137,11 @@ public class FactoryController {
             public void actionPerformed(ActionEvent e){
                 System.out.println("Creating Special Machine");
                 factoryModel.createSVM();
-                specialVendingMachine = factoryModel.getSVM();
-                isSpecial = true;
-                isRegular = false;
+                specialVendingMachine = factoryModel.getSVM(FactoryController.this.items,FactoryController.this.prices,FactoryController.this.calories,FactoryController.this.values,FactoryController.this.itemStocks,FactoryController.this.moneyStocks,FactoryController.this.transactions,
+                        FactoryController.this.vendView,FactoryController.this.specialVendView,FactoryController.this.maintView,FactoryController.this.stockItemView,FactoryController.this.setItemPriceView,FactoryController.this.transactionHistoryView,FactoryController.this.stockMoneyView);
+                FactoryController.this.isSpecial = true;
+                FactoryController.this.isRegular = false;
+                notifyObservers();
             }
         });
 
@@ -186,7 +192,7 @@ public class FactoryController {
             }
         });
 
-        for (int i = 0; i < items.size(); i++) {
+        for (int i = 0; i < displayItems.size(); i++) {
             JTextArea temp = vendView.getDisplayPriceTextArea(i);
             JTextArea toUpdate = vendView.getPriceTextArea();
             String priceText = temp.getText();
@@ -213,7 +219,7 @@ public class FactoryController {
 
         this.vendView.setBuyButtonListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                factoryModel.buyItemButton(vendView,currentItems,items,itemStocks);
+                factoryModel.buyItemButton(isRegular,isSpecial,specialVendView,vendView,currentItems,items,itemStocks,vendingMachine,specialVendingMachine);
                 notifyObservers();
             }
         });
@@ -256,7 +262,7 @@ public class FactoryController {
 
         this.specialVendView.setBuyButtonListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                factoryModel.buyItemButton(vendView,currentItems,items,itemStocks);
+                factoryModel.buyItemButton(isRegular,isSpecial,specialVendView,vendView,currentItems,items,itemStocks,vendingMachine,specialVendingMachine);
                 notifyObservers();
             }
         });
@@ -306,14 +312,17 @@ public class FactoryController {
         });
 
         this.specialVendView.setConfirmBasketButtonListener(new ActionListener(){
+            JTextArea clear = specialVendView.getBasket();
             public void actionPerformed(ActionEvent e){
-                factoryModel.specialVendConfirmButton(specialVendView,specialVendingMachine,optionItems,items);
+                factoryModel.specialVendConfirmButton(specialVendView,specialVendingMachine,optionItems,items,clear);
                 notifyObservers();
             }
         });
 
         this.specialVendView.setCloseSpecialButtonListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
+                JTextArea clear = specialVendView.getBasket();
+                clear.setText("");
                 JPanel temp = specialVendView.getSpecialPanel();
                 temp.setVisible(false);
                 JButton holder = specialVendView.getSpecialItem();
@@ -354,14 +363,38 @@ public class FactoryController {
             }
         });
 
+        this.stockMoneyView.setRestockButtonListener(new ActionListener() {
+            ArrayList<JTextArea> hold = stockMoneyView.getStock();
+
+            public void actionPerformed(ActionEvent e) {
+                ArrayList<Integer> money = new ArrayList<>();
+                for(int i = 0;i < hold.size();i++){
+                    money.add(1);
+                }
+                factoryModel.setStockMoneyButton(isRegular,isSpecial,vendingMachine,specialVendingMachine,money,hold);
+                money.clear();
+            }
+        });
+
+        this.stockItemView.setBackButtonListener(new ActionListener(){
+            public void actionPerformed(ActionEvent e){
+                stockItemView.setVisible(false);
+                maintView.setVisible(true);
+            }
+        });
+
         for(int i = 0; i < items.size(); i++) {
             JTextArea temp = stockItemView.getStock(i);
-            ArrayList<ItemStack> itemTypes = vendingMachine.getItemTypes();
+            ArrayList<ItemStack> itemTypes = specialVendingMachine.getItemTypes();
+            if(isRegular)
+                itemTypes = vendingMachine.getItemTypes();
+            else if (isSpecial)
+                itemTypes = specialVendingMachine.getItemTypes();
             int currentItem = i;
             ItemStack currentStack = itemTypes.get(i);
             this.stockItemView.setItemButtonListener(i, new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    factoryModel.setStockItemButton(temp,itemStocks,currentItem,currentStack);
+                    factoryModel.setStockItemButton(temp,itemStocks,currentItem,currentStack,isRegular,isSpecial,vendingMachine,specialVendingMachine);
                     notifyObservers();
                 }
             });
@@ -429,26 +462,28 @@ public class FactoryController {
             }
         });
 
-        this.stockItemView.setBackButtonListener(new ActionListener(){
-            public void actionPerformed(ActionEvent e){
-                stockItemView.setVisible(false);
-                maintView.setVisible(true);
-            }
-        });
 
-        for(int i = 0; i < denominations.size(); i++) {
-            JTextArea temp = stockMoneyView.getStock(i);
-            this.stockMoneyView.setItemButtonListener(i, new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    factoryModel.setStockMoneyButton(temp);
-                    notifyObservers();
-                }
-            });
-        }
 
         this.stockMoneyView.setBackButtonListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 stockMoneyView.setVisible(false);
+                System.out.println("frame set invisible");
+                maintView.setVisible(true);
+                System.out.println("frame set invisible");
+            }
+        });
+
+        this.collectMoneyView.setCollectMoneyButtonListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                factoryModel.setCollectMoneyButton(isRegular,isSpecial,vendingMachine,specialVendingMachine,collectMoneyView);
+            }
+        });
+
+        this.collectMoneyView.setBackButtonListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JTextArea temp = collectMoneyView.getCollected();
+                temp.setText("");
+                collectMoneyView.setVisible(false);
                 System.out.println("frame set invisible");
                 maintView.setVisible(true);
                 System.out.println("frame set invisible");
@@ -494,6 +529,16 @@ public class FactoryController {
             }
         });
 
+        this.maintView.setCollectMoneyButton(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                maintView.setVisible(false);
+                System.out.println("frame set invisible");
+                collectMoneyView.setVisible(true);
+                System.out.println("frame set invisible");
+            }
+        });
+
         this.maintView.setTransHistoryButton(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -503,15 +548,6 @@ public class FactoryController {
                 System.out.println("frame set invisible");
             }
         });
-    }
-
-
-
-    private String updateStock(String string,int j){
-        int i = Integer.parseInt(string);
-        i = i + j;
-        String holder = String.valueOf(i);
-        return holder;
     }
 
     // Method to add observers to the list
